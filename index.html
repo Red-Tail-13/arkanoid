@@ -311,13 +311,7 @@
   /* ── MOBILE ── */
   .logo-matrix-wrap { width:min(520px,calc(100vw - 8px)); }
 
-  /* pause button — hidden by default, shown only on touch devices while game runs */
-  #mobile-pause-btn {
-    display:none;
-    touch-action:manipulation;
-  }
-
-  /* build version badge — always rendered, shown only on touch */
+  /* build version badge */
   #build-ver {
     display:none;
     position:fixed;
@@ -331,7 +325,31 @@
     user-select:none;
   }
 
-  /* touch drag zone — hidden on desktop */
+  /* inline HUD control bar — hidden on desktop */
+  #hud-mobile-btns {
+    display:none;
+    gap:6px;
+    align-items:center;
+  }
+  #mobile-pause-btn {
+    background:rgba(0,0,0,.55);
+    border:1.5px solid var(--accent);
+    color:var(--accent);
+    font-family:'Orbitron',monospace;
+    font-size:.65rem; font-weight:700; letter-spacing:.1em;
+    padding:6px 10px; border-radius:8px;
+    cursor:pointer; touch-action:manipulation;
+    box-shadow:0 0 8px var(--accent)33;
+    -webkit-tap-highlight-color:transparent;
+    transition:background .12s, box-shadow .12s;
+    white-space:nowrap;
+  }
+  #mobile-pause-btn:active {
+    background:rgba(0,0,0,.85);
+    box-shadow:0 0 18px var(--accent)77;
+  }
+
+  /* touch drag zone — hidden by default, fixed to bottom when .active */
   #touch-zone {
     display:none;
   }
@@ -342,46 +360,27 @@
 
     #build-ver { display:block; }
 
-    /* pause pill — top-right corner */
-    #mobile-pause-btn {
-      position:fixed;
-      top:max(10px, env(safe-area-inset-top, 0px));
-      right:12px;
-      z-index:5;
-      background:rgba(0,0,0,.72);
-      border:1.5px solid var(--accent);
-      color:var(--accent);
-      font-family:'Orbitron',monospace;
-      font-size:.72rem; font-weight:700; letter-spacing:.14em;
-      padding:8px 18px; border-radius:50px;
-      cursor:pointer;
-      box-shadow:0 0 14px var(--accent)44;
-      transition:background .15s, box-shadow .15s;
-      -webkit-tap-highlight-color:transparent;
-    }
-    #mobile-pause-btn:active {
-      background:rgba(0,0,0,.92);
-      box-shadow:0 0 26px var(--accent)88;
-    }
-    #mobile-pause-btn.active { display:block; }
+    /* show inline HUD buttons when game running */
+    #hud-mobile-btns.active { display:flex; }
 
-    /* drag-to-move strip below the canvas */
-    #touch-zone {
+    /* drag-to-move strip — fixed to bottom of screen */
+    #touch-zone.active {
       display:flex;
+      position:fixed;
+      bottom:env(safe-area-inset-bottom, 0px);
+      left:0; right:0;
+      width:100%;
+      height:76px;
       align-items:center;
       justify-content:center;
-      position:relative;
-      width:min(480px, calc(100vw - 16px));
-      height:72px;
-      margin-top:6px;
-      background:rgba(255,255,255,.03);
-      border:1px solid var(--accent)33;
-      border-radius:12px;
+      background:rgba(0,0,0,.72);
+      border-top:1px solid var(--accent)33;
+      border-radius:0;
       touch-action:none;
       user-select:none;
       -webkit-tap-highlight-color:transparent;
       overflow:hidden;
-      flex-shrink:0;
+      z-index:4;
     }
     #touch-zone-track {
       position:absolute;
@@ -390,7 +389,7 @@
     #touch-zone-thumb {
       position:absolute;
       top:50%; transform:translate(-50%,-50%);
-      width:48px; height:48px;
+      width:44px; height:44px;
       border-radius:50%;
       background:var(--accent)22;
       border:2px solid var(--accent)88;
@@ -406,9 +405,15 @@
       z-index:1;
     }
 
-    /* bottom safe area below touch zone */
+    /* give game-view room at bottom for the fixed touch zone */
     #game-view {
-      padding-bottom:max(16px, env(safe-area-inset-bottom, 0px));
+      padding-bottom:calc(env(safe-area-inset-bottom, 0px) + 82px);
+    }
+
+    /* logo always on top — ensure it doesn't get squeezed */
+    #game-logo {
+      margin-top:4px;
+      flex-shrink:0;
     }
   }
   @media (max-width:520px) {
@@ -432,23 +437,26 @@
 
 <!-- ══ GAME VIEW ══ -->
 <div id="build-ver">v1.0</div>
+<!-- touch drag zone — fixed to bottom on mobile, lives outside game-view -->
+<div id="touch-zone">
+  <div id="touch-zone-track"></div>
+  <div id="touch-zone-thumb"></div>
+  <span id="touch-zone-label">◀ DRAG TO MOVE ▶</span>
+</div>
 <div id="game-view" style="display:none;flex-direction:column;align-items:center;">
   <h1 id="game-logo" style="font-size:1.3rem;font-weight:900;letter-spacing:.3em;color:var(--accent);text-shadow:0 0 16px var(--accent);margin-bottom:8px;">ARKANOID</h1>
   <div id="hud">
     <div><span style="color:#aaa;font-size:.7rem;">SCORE &nbsp;</span><span id="score-val">0</span></div>
     <div style="color:#aaa;font-size:.7rem;letter-spacing:.15em;">LV &nbsp;<span id="level-val" style="color:var(--accent);font-size:1.1rem;font-weight:700;text-shadow:0 0 10px var(--accent);">1</span></div>
     <div id="lives"><span class="heart" id="h1">❤️</span><span class="heart" id="h2">❤️</span><span class="heart" id="h3">❤️</span></div>
+    <!-- mobile-only: pause button inline in HUD row -->
+    <div id="hud-mobile-btns">
+      <button id="mobile-pause-btn" onclick="openPause()">⏸</button>
+    </div>
   </div>
   <canvas id="c" width="480" height="520"></canvas>
-  <!-- touch control strip — only rendered on coarse-pointer devices -->
-  <div id="touch-zone">
-    <div id="touch-zone-track"></div>
-    <div id="touch-zone-thumb"></div>
-    <span id="touch-zone-label">◀ DRAG TO MOVE ▶</span>
-  </div>
   <div id="game-toolbar">
     <div id="hint">MOUSE / ← → &nbsp;·&nbsp; SPACE to launch &nbsp;·&nbsp; ESC to pause</div>
-    <button id="mute-btn" onclick="toggleMute()" title="Toggle sound (M)" style="background:none;border:1px solid #333;border-radius:6px;color:#666;font-size:1rem;cursor:pointer;padding:2px 8px;margin-left:12px;transition:color .2s,border-color .2s;" onmouseover="this.style.color='var(--accent)';this.style.borderColor='var(--accent)'" onmouseout="this.style.color='#666';this.style.borderColor='#333'">🔊</button>
   </div>
 </div>
 
@@ -462,6 +470,7 @@
     <button class="menu-item"     data-idx="2"><span class="icon">🏆</span>HIGH SCORES</button>
     <button class="menu-item"     data-idx="3"><span class="icon">🎨</span>CHANGE SKIN</button>
     <button class="menu-item"     data-idx="4"><span class="icon">✕</span>QUIT</button>
+    <button class="menu-item"     data-idx="5" id="menu-mute-btn"><span class="icon">🔊</span><span id="menu-mute-label">SOUND ON</span></button>
   </div>
   <label id="admin-label" style="margin-top:24px;display:flex;align-items:center;gap:10px;font-size:.6rem;letter-spacing:.18em;color:#333;cursor:pointer;user-select:none;transition:color .2s;">
     <input type="checkbox" id="admin-check" style="accent-color:var(--accent);width:14px;height:14px;cursor:pointer;">
@@ -479,6 +488,7 @@
     <button class="menu-item"     data-pidx="2"><span class="icon">📂</span>LOAD GAME</button>
     <button class="menu-item"     data-pidx="3"><span class="icon">🎨</span>CHANGE SKIN</button>
     <button class="menu-item"     data-pidx="4"><span class="icon">🏠</span>MAIN MENU</button>
+    <button class="menu-item"     data-pidx="5" id="pause-mute-btn"><span class="icon">🔊</span><span id="pause-mute-label">SOUND ON</span></button>
   </div>
 </div>
 
@@ -533,7 +543,6 @@
 </div>
 
 <div id="save-toast"></div>
-<button id="mobile-pause-btn" onclick="openPause()">⏸ PAUSE</button>
 
 <script>
 // ══════════════════════════════════════════
@@ -620,6 +629,7 @@ let theme = THEMES[0];
 
 function loadPrefs(){
   try { const t=localStorage.getItem('ark_theme'); if(t) theme=THEMES.find(x=>x.id===t)||THEMES[0]; } catch(e){}
+  try { if(localStorage.getItem('ark_muted')==='1'){_muted=true;} } catch(e){}
   applyTheme();
 }
 function applyTheme(){
@@ -870,6 +880,7 @@ function doMenuAction(i){
   if(i===2) showHiScores('menu');
   if(i===3) openSkins('menu');
   if(i===4){ document.getElementById('main-logo-wrap').innerHTML='<div class="logo-neon" style="color:#555;text-shadow:none;animation:none;">GOODBYE</div>'; document.getElementById('menu-sub').textContent='Close this tab to exit.'; document.querySelectorAll('#menu-list .menu-item').forEach(b=>b.style.display='none'); }
+  if(i===5) toggleMute();
 }
 
 // ══════════════════════════════════════════
@@ -886,6 +897,7 @@ function doPauseAction(i){
   if(i===2) showSlots('load','pause');
   if(i===3) openSkins('pause');
   if(i===4){ gameRunning=false; cancelAnimationFrame(animId); setMobilePauseBtn(false); showScreen('menu'); }
+  if(i===5) toggleMute();
 }
 function openPause(){
   gameRunning=false; cancelAnimationFrame(animId); selectPause(0);
@@ -1055,8 +1067,8 @@ function updateHUD(){
 }
 
 function setMobilePauseBtn(show){
-  const btn=document.getElementById('mobile-pause-btn');
-  if(btn) btn.classList.toggle('active',show);
+  document.getElementById('hud-mobile-btns')?.classList.toggle('active',show);
+  document.getElementById('touch-zone')?.classList.toggle('active',show);
 }
 
 function startNewGame(){
@@ -1688,15 +1700,26 @@ function sndWin(){
 }
 
 // mute toggle (M key or button added below)
+function _updateMuteLabels(){
+  const icon=_muted?'🔇':'🔊';
+  const text=_muted?'SOUND OFF':'SOUND ON';
+  [['menu-mute-btn','menu-mute-label'],['pause-mute-btn','pause-mute-label']].forEach(([bid,lid])=>{
+    const ic=document.querySelector('#'+bid+' .icon');
+    const lb=document.getElementById(lid);
+    if(ic)ic.textContent=icon;
+    if(lb)lb.textContent=text;
+  });
+}
 function toggleMute(){
   _muted=!_muted;
-  const btn=document.getElementById('mute-btn');
-  if(btn)btn.textContent=_muted?'🔇':'🔊';
+  try{localStorage.setItem('ark_muted',_muted?'1':'0');}catch(e){}
+  _updateMuteLabels();
 }
 document.addEventListener('keydown',e=>{ if(e.key==='m'||e.key==='M') toggleMute(); });
 
 // ── Init ──
 loadPrefs();
+_updateMuteLabels();
 renderSkins();
 document.getElementById('admin-check').addEventListener('change',e=>{
   adminMode=e.target.checked;
