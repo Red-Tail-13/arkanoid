@@ -32,7 +32,7 @@
   #hint { font-size:0.6rem; letter-spacing:.2em; color:#444; }
 
   /* ── SCREENS ── */
-  .screen { position:fixed; inset:0; background:var(--screen-bg,#0a0a1af2); display:none; flex-direction:column; align-items:center; justify-content:center; z-index:10; transition:background .6s ease; }
+  .screen { position:fixed; inset:0; background:var(--screen-bg,#0a0a1af2); display:none; flex-direction:column; align-items:center; justify-content:center; z-index:200; transition:background .6s ease; }
   .screen.active { display:flex; }
   #screen-pause { background:var(--pause-bg,#0a0a1acc); }
 
@@ -901,7 +901,7 @@ function doPauseAction(i){
 }
 function openPause(){
   gameRunning=false; cancelAnimationFrame(animId); selectPause(0);
-  document.exitPointerLock();
+  document.exitPointerLock?.();
   drawBg(); if(particles.length) drawParticles(); drawBricks(); drawPaddle(); drawBalls();
   setMobilePauseBtn(false);
   showScreen('pause');
@@ -1519,7 +1519,7 @@ function loop(){
 }
 
 function endGame(win){
-  gameRunning=false;cancelAnimationFrame(animId);document.exitPointerLock();setMobilePauseBtn(false);
+  gameRunning=false;cancelAnimationFrame(animId);document.exitPointerLock?.();setMobilePauseBtn(false);
   if(win && currentLevel<LEVELS.length){
     // level clear sound already played when levelClearDelay was set
     const bonus=currentLevel*100;
