@@ -317,27 +317,43 @@
     touch-action:manipulation;
   }
 
+  /* build version badge — always rendered, shown only on touch */
+  #build-ver {
+    display:none;
+    position:fixed;
+    top:max(10px, env(safe-area-inset-top, 0px));
+    left:12px;
+    z-index:6;
+    font-family:'Orbitron',monospace;
+    font-size:.52rem; letter-spacing:.12em;
+    color:#ffffff22;
+    pointer-events:none;
+    user-select:none;
+  }
+
+  /* touch drag zone — hidden on desktop */
+  #touch-zone {
+    display:none;
+  }
+
   @media (pointer:coarse) {
     #hint { display:none; }
     body { overscroll-behavior:none; }
 
-    /* push canvas up from the bottom edge so thumbs have room */
-    #game-view {
-      padding-bottom:max(72px, calc(env(safe-area-inset-bottom, 0px) + 64px));
-    }
+    #build-ver { display:block; }
 
-    /* floating pause pill — centred below the canvas */
+    /* pause pill — top-right corner */
     #mobile-pause-btn {
       position:fixed;
-      bottom:max(18px, calc(env(safe-area-inset-bottom, 0px) + 12px));
-      left:50%; transform:translateX(-50%);
+      top:max(10px, env(safe-area-inset-top, 0px));
+      right:12px;
       z-index:5;
       background:rgba(0,0,0,.72);
       border:1.5px solid var(--accent);
       color:var(--accent);
       font-family:'Orbitron',monospace;
-      font-size:.78rem; font-weight:700; letter-spacing:.16em;
-      padding:12px 32px; border-radius:50px;
+      font-size:.72rem; font-weight:700; letter-spacing:.14em;
+      padding:8px 18px; border-radius:50px;
       cursor:pointer;
       box-shadow:0 0 14px var(--accent)44;
       transition:background .15s, box-shadow .15s;
@@ -348,6 +364,52 @@
       box-shadow:0 0 26px var(--accent)88;
     }
     #mobile-pause-btn.active { display:block; }
+
+    /* drag-to-move strip below the canvas */
+    #touch-zone {
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      position:relative;
+      width:min(480px, calc(100vw - 16px));
+      height:72px;
+      margin-top:6px;
+      background:rgba(255,255,255,.03);
+      border:1px solid var(--accent)33;
+      border-radius:12px;
+      touch-action:none;
+      user-select:none;
+      -webkit-tap-highlight-color:transparent;
+      overflow:hidden;
+      flex-shrink:0;
+    }
+    #touch-zone-track {
+      position:absolute;
+      inset:0;
+    }
+    #touch-zone-thumb {
+      position:absolute;
+      top:50%; transform:translate(-50%,-50%);
+      width:48px; height:48px;
+      border-radius:50%;
+      background:var(--accent)22;
+      border:2px solid var(--accent)88;
+      box-shadow:0 0 12px var(--accent)44;
+      transition:left .05s linear;
+      pointer-events:none;
+    }
+    #touch-zone-label {
+      font-family:'Orbitron',monospace;
+      font-size:.52rem; letter-spacing:.18em;
+      color:var(--accent)55;
+      pointer-events:none;
+      z-index:1;
+    }
+
+    /* bottom safe area below touch zone */
+    #game-view {
+      padding-bottom:max(16px, env(safe-area-inset-bottom, 0px));
+    }
   }
   @media (max-width:520px) {
     #mute-btn { padding:6px 14px; font-size:1.1rem; }
@@ -369,6 +431,7 @@
 <body>
 
 <!-- ══ GAME VIEW ══ -->
+<div id="build-ver">v1.0</div>
 <div id="game-view" style="display:none;flex-direction:column;align-items:center;">
   <h1 id="game-logo" style="font-size:1.3rem;font-weight:900;letter-spacing:.3em;color:var(--accent);text-shadow:0 0 16px var(--accent);margin-bottom:8px;">ARKANOID</h1>
   <div id="hud">
@@ -377,6 +440,12 @@
     <div id="lives"><span class="heart" id="h1">❤️</span><span class="heart" id="h2">❤️</span><span class="heart" id="h3">❤️</span></div>
   </div>
   <canvas id="c" width="480" height="520"></canvas>
+  <!-- touch control strip — only rendered on coarse-pointer devices -->
+  <div id="touch-zone">
+    <div id="touch-zone-track"></div>
+    <div id="touch-zone-thumb"></div>
+    <span id="touch-zone-label">◀ DRAG TO MOVE ▶</span>
+  </div>
   <div id="game-toolbar">
     <div id="hint">MOUSE / ← → &nbsp;·&nbsp; SPACE to launch &nbsp;·&nbsp; ESC to pause</div>
     <button id="mute-btn" onclick="toggleMute()" title="Toggle sound (M)" style="background:none;border:1px solid #333;border-radius:6px;color:#666;font-size:1rem;cursor:pointer;padding:2px 8px;margin-left:12px;transition:color .2s,border-color .2s;" onmouseover="this.style.color='var(--accent)';this.style.borderColor='var(--accent)'" onmouseout="this.style.color='#666';this.style.borderColor='#333'">🔊</button>
@@ -756,7 +825,7 @@ function loadSlot(i){
   if(s.themeId){ const t=THEMES.find(x=>x.id===s.themeId); if(t){theme=t;try{localStorage.setItem('ark_theme',t.id);}catch(e){} applyTheme();} }
   showScreen(null); document.getElementById('game-view').style.display='flex';
   restoreState(s); gameRunning=true; if(animId)cancelAnimationFrame(animId); loop();
-  canvas.requestPointerLock();
+  if(!_isTouch())canvas.requestPointerLock();
   setMobilePauseBtn(true);
 }
 
@@ -828,7 +897,7 @@ function openPause(){
 function resumeFromPause(){
   showScreen(null); document.getElementById('game-view').style.display='flex';
   gameRunning=true; loop();
-  canvas.requestPointerLock();
+  if(!_isTouch())canvas.requestPointerLock();
   setMobilePauseBtn(true);
 }
 
@@ -994,7 +1063,7 @@ function startNewGame(){
   showScreen(null); document.getElementById('game-view').style.display='flex';
   canvas.style.background=theme.bg; initState(1);
   gameRunning=true; if(animId)cancelAnimationFrame(animId); loop();
-  canvas.requestPointerLock();
+  if(!_isTouch())canvas.requestPointerLock();
   setMobilePauseBtn(true);
 }
 
@@ -1012,11 +1081,14 @@ function advanceLevel(){
   setMobilePauseBtn(true);
 }
 
+// True for any touch/stylus device — skip pointer lock on these
+const _isTouch=()=>navigator.maxTouchPoints>0||'ontouchstart' in window;
+
 canvas.addEventListener('mousemove',e=>{
   if(!gameRunning)return;
   const r=canvas.getBoundingClientRect();
   const sx=W/r.width;
-  if(document.pointerLockElement===canvas){
+  if(!_isTouch()&&document.pointerLockElement===canvas){
     paddle.x=Math.max(0,Math.min(W-paddle.w,paddle.x+e.movementX*sx*0.55));
   } else {
     paddle.x=Math.max(0,Math.min(W-paddle.w,(e.clientX-r.left)*sx-paddle.w/2));
@@ -1025,14 +1097,14 @@ canvas.addEventListener('mousemove',e=>{
 canvas.addEventListener('click',()=>{
   if(gameRunning){
     if(balls.some(b=>b.attached))launch();
-    if(document.pointerLockElement!==canvas)canvas.requestPointerLock();
+    if(!_isTouch()&&document.pointerLockElement!==canvas)canvas.requestPointerLock();
   }
 });
 document.addEventListener('pointerlockchange',()=>{
-  if(document.pointerLockElement!==canvas&&gameRunning)openPause();
+  if(!_isTouch()&&document.pointerLockElement!==canvas&&gameRunning)openPause();
 });
 
-// Touch controls
+// Touch controls on the canvas itself (tap to launch, swipe to move)
 let _touchMoved=false;
 canvas.addEventListener('touchstart',e=>{
   e.preventDefault();
@@ -1051,6 +1123,47 @@ canvas.addEventListener('touchmove',e=>{
 canvas.addEventListener('touchend',e=>{
   e.preventDefault();
   if(gameRunning&&!_touchMoved&&balls.some(b=>b.attached))launch();
+},{passive:false});
+
+// ── Touch zone (drag strip below canvas) ──
+const _tz=document.getElementById('touch-zone');
+const _tzThumb=document.getElementById('touch-zone-thumb');
+const _tzLabel=document.getElementById('touch-zone-label');
+let _tzActive=false,_tzMoved=false;
+
+function _tzUpdateThumb(){
+  // mirror paddle centre position onto the thumb
+  const frac=(paddle.x+paddle.w/2)/W;
+  const tzW=_tz.getBoundingClientRect().width||480;
+  _tzThumb.style.left=(frac*tzW)+'px';
+}
+
+_tz.addEventListener('touchstart',e=>{
+  e.preventDefault();
+  if(!gameRunning)return;
+  _tzActive=true; _tzMoved=false;
+  _tzLabel.style.opacity='0';
+  const t=e.touches[0],r=_tz.getBoundingClientRect();
+  const frac=Math.max(0,Math.min(1,(t.clientX-r.left)/r.width));
+  paddle.x=Math.max(0,Math.min(W-paddle.w,frac*W-paddle.w/2));
+  _tzUpdateThumb();
+},{passive:false});
+
+_tz.addEventListener('touchmove',e=>{
+  e.preventDefault();
+  if(!gameRunning||!_tzActive)return;
+  _tzMoved=true;
+  const t=e.touches[0],r=_tz.getBoundingClientRect();
+  const frac=Math.max(0,Math.min(1,(t.clientX-r.left)/r.width));
+  paddle.x=Math.max(0,Math.min(W-paddle.w,frac*W-paddle.w/2));
+  _tzUpdateThumb();
+},{passive:false});
+
+_tz.addEventListener('touchend',e=>{
+  e.preventDefault();
+  _tzActive=false;
+  _tzLabel.style.opacity='';
+  if(gameRunning&&!_tzMoved&&balls.some(b=>b.attached))launch();
 },{passive:false});
 
 function launch(){
@@ -1376,6 +1489,7 @@ function drawFlash(){if(flashAlpha>0){ctx.fillStyle=`rgba(255,50,80,${flashAlpha
 function loop(){
   if(!gameRunning)return;
   drawBg();updateParticles();drawParticles();update();drawBricks();drawPowerups();drawPaddle();drawBalls();drawShield();drawActivePups();drawFlash();
+  _tzUpdateThumb();
   if(levelClearDelay>0){
     const d=levelClearDelay;
     const a=d>90?(110-d)/20:d<20?d/20:1;
