@@ -331,7 +331,7 @@
     gap:6px;
     align-items:center;
   }
-  #mobile-mute-btn, #mobile-pause-btn {
+  #mobile-pause-btn {
     background:rgba(0,0,0,.55);
     border:1.5px solid var(--accent);
     color:var(--accent);
@@ -344,7 +344,7 @@
     transition:background .12s, box-shadow .12s;
     white-space:nowrap;
   }
-  #mobile-mute-btn:active, #mobile-pause-btn:active {
+  #mobile-pause-btn:active {
     background:rgba(0,0,0,.85);
     box-shadow:0 0 18px var(--accent)77;
   }
@@ -362,7 +362,6 @@
 
     /* show inline HUD buttons when game running */
     #hud-mobile-btns.active { display:flex; }
-    #mute-btn { display:none; }
 
     /* drag-to-move strip — fixed to bottom of screen */
     #touch-zone.active {
@@ -450,16 +449,14 @@
     <div><span style="color:#aaa;font-size:.7rem;">SCORE &nbsp;</span><span id="score-val">0</span></div>
     <div style="color:#aaa;font-size:.7rem;letter-spacing:.15em;">LV &nbsp;<span id="level-val" style="color:var(--accent);font-size:1.1rem;font-weight:700;text-shadow:0 0 10px var(--accent);">1</span></div>
     <div id="lives"><span class="heart" id="h1">❤️</span><span class="heart" id="h2">❤️</span><span class="heart" id="h3">❤️</span></div>
-    <!-- mobile-only: mute + pause inline in HUD row -->
+    <!-- mobile-only: pause button inline in HUD row -->
     <div id="hud-mobile-btns">
-      <button id="mobile-mute-btn" onclick="toggleMute()">🔊</button>
       <button id="mobile-pause-btn" onclick="openPause()">⏸</button>
     </div>
   </div>
   <canvas id="c" width="480" height="520"></canvas>
   <div id="game-toolbar">
     <div id="hint">MOUSE / ← → &nbsp;·&nbsp; SPACE to launch &nbsp;·&nbsp; ESC to pause</div>
-    <button id="mute-btn" onclick="toggleMute()" title="Toggle sound (M)" style="background:none;border:1px solid #333;border-radius:6px;color:#666;font-size:1rem;cursor:pointer;padding:2px 8px;margin-left:12px;transition:color .2s,border-color .2s;" onmouseover="this.style.color='var(--accent)';this.style.borderColor='var(--accent)'" onmouseout="this.style.color='#666';this.style.borderColor='#333'">🔊</button>
   </div>
 </div>
 
@@ -473,6 +470,7 @@
     <button class="menu-item"     data-idx="2"><span class="icon">🏆</span>HIGH SCORES</button>
     <button class="menu-item"     data-idx="3"><span class="icon">🎨</span>CHANGE SKIN</button>
     <button class="menu-item"     data-idx="4"><span class="icon">✕</span>QUIT</button>
+    <button class="menu-item"     data-idx="5" id="menu-mute-btn"><span class="icon">🔊</span><span id="menu-mute-label">SOUND ON</span></button>
   </div>
   <label id="admin-label" style="margin-top:24px;display:flex;align-items:center;gap:10px;font-size:.6rem;letter-spacing:.18em;color:#333;cursor:pointer;user-select:none;transition:color .2s;">
     <input type="checkbox" id="admin-check" style="accent-color:var(--accent);width:14px;height:14px;cursor:pointer;">
@@ -490,6 +488,7 @@
     <button class="menu-item"     data-pidx="2"><span class="icon">📂</span>LOAD GAME</button>
     <button class="menu-item"     data-pidx="3"><span class="icon">🎨</span>CHANGE SKIN</button>
     <button class="menu-item"     data-pidx="4"><span class="icon">🏠</span>MAIN MENU</button>
+    <button class="menu-item"     data-pidx="5" id="pause-mute-btn"><span class="icon">🔊</span><span id="pause-mute-label">SOUND ON</span></button>
   </div>
 </div>
 
@@ -630,6 +629,7 @@ let theme = THEMES[0];
 
 function loadPrefs(){
   try { const t=localStorage.getItem('ark_theme'); if(t) theme=THEMES.find(x=>x.id===t)||THEMES[0]; } catch(e){}
+  try { if(localStorage.getItem('ark_muted')==='1'){_muted=true;} } catch(e){}
   applyTheme();
 }
 function applyTheme(){
@@ -880,6 +880,7 @@ function doMenuAction(i){
   if(i===2) showHiScores('menu');
   if(i===3) openSkins('menu');
   if(i===4){ document.getElementById('main-logo-wrap').innerHTML='<div class="logo-neon" style="color:#555;text-shadow:none;animation:none;">GOODBYE</div>'; document.getElementById('menu-sub').textContent='Close this tab to exit.'; document.querySelectorAll('#menu-list .menu-item').forEach(b=>b.style.display='none'); }
+  if(i===5) toggleMute();
 }
 
 // ══════════════════════════════════════════
@@ -896,6 +897,7 @@ function doPauseAction(i){
   if(i===2) showSlots('load','pause');
   if(i===3) openSkins('pause');
   if(i===4){ gameRunning=false; cancelAnimationFrame(animId); setMobilePauseBtn(false); showScreen('menu'); }
+  if(i===5) toggleMute();
 }
 function openPause(){
   gameRunning=false; cancelAnimationFrame(animId); selectPause(0);
@@ -1698,17 +1700,26 @@ function sndWin(){
 }
 
 // mute toggle (M key or button added below)
+function _updateMuteLabels(){
+  const icon=_muted?'🔇':'🔊';
+  const text=_muted?'SOUND OFF':'SOUND ON';
+  [['menu-mute-btn','menu-mute-label'],['pause-mute-btn','pause-mute-label']].forEach(([bid,lid])=>{
+    const ic=document.querySelector('#'+bid+' .icon');
+    const lb=document.getElementById(lid);
+    if(ic)ic.textContent=icon;
+    if(lb)lb.textContent=text;
+  });
+}
 function toggleMute(){
   _muted=!_muted;
-  const icon=_muted?'🔇':'🔊';
-  document.getElementById('mute-btn').textContent=icon;
-  const mb=document.getElementById('mobile-mute-btn');
-  if(mb)mb.textContent=icon;
+  try{localStorage.setItem('ark_muted',_muted?'1':'0');}catch(e){}
+  _updateMuteLabels();
 }
 document.addEventListener('keydown',e=>{ if(e.key==='m'||e.key==='M') toggleMute(); });
 
 // ── Init ──
 loadPrefs();
+_updateMuteLabels();
 renderSkins();
 document.getElementById('admin-check').addEventListener('change',e=>{
   adminMode=e.target.checked;
