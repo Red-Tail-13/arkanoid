@@ -310,19 +310,47 @@
 
   /* ── MOBILE ── */
   .logo-matrix-wrap { width:min(520px,calc(100vw - 8px)); }
+
+  /* pause button — hidden by default, shown only on touch devices while game runs */
   #mobile-pause-btn {
-    position:fixed; top:10px; right:10px; z-index:5;
-    background:rgba(0,0,0,.6); border:1px solid var(--accent);
-    color:var(--accent); font-family:'Orbitron',monospace; font-size:.7rem;
-    padding:8px 14px; border-radius:6px; cursor:pointer;
-    touch-action:manipulation; letter-spacing:.1em; display:none;
+    display:none;
+    touch-action:manipulation;
   }
+
   @media (pointer:coarse) {
-    #mobile-pause-btn.active { display:block; }
     #hint { display:none; }
     body { overscroll-behavior:none; }
+
+    /* push canvas up from the bottom edge so thumbs have room */
+    #game-view {
+      padding-bottom:max(72px, calc(env(safe-area-inset-bottom, 0px) + 64px));
+    }
+
+    /* floating pause pill — centred below the canvas */
+    #mobile-pause-btn {
+      position:fixed;
+      bottom:max(18px, calc(env(safe-area-inset-bottom, 0px) + 12px));
+      left:50%; transform:translateX(-50%);
+      z-index:5;
+      background:rgba(0,0,0,.72);
+      border:1.5px solid var(--accent);
+      color:var(--accent);
+      font-family:'Orbitron',monospace;
+      font-size:.78rem; font-weight:700; letter-spacing:.16em;
+      padding:12px 32px; border-radius:50px;
+      cursor:pointer;
+      box-shadow:0 0 14px var(--accent)44;
+      transition:background .15s, box-shadow .15s;
+      -webkit-tap-highlight-color:transparent;
+    }
+    #mobile-pause-btn:active {
+      background:rgba(0,0,0,.92);
+      box-shadow:0 0 26px var(--accent)88;
+    }
+    #mobile-pause-btn.active { display:block; }
   }
   @media (max-width:520px) {
+    #mute-btn { padding:6px 14px; font-size:1.1rem; }
     .logo-neon,.logo-synth,.logo-ice,.logo-lava,.logo-void { font-size:2rem; letter-spacing:.15em; }
     .logo-cyber { font-size:2.1rem; letter-spacing:.12em; }
     .logo-cyber::before,.logo-cyber::after { font-size:2.1rem; letter-spacing:.12em; }
