@@ -20,15 +20,15 @@
   /* ── HUD ── */
   #hud {
     display:flex; justify-content:space-between; align-items:center;
-    width:min(480px,calc(100vw - 16px)); margin-bottom:8px;
+    width:min(540px,calc(100vw - 16px)); margin-bottom:8px;
     font-size:0.75rem; letter-spacing:0.15em;
   }
   #score-val { color:var(--accent); font-size:1.1rem; font-weight:700; text-shadow:0 0 10px var(--accent); }
   #lives { display:flex; gap:6px; font-size:1.2rem; }
   .heart { transition:opacity .3s; }
   .heart.lost { opacity:.15; }
-  canvas { display:block; border:1px solid #ffffff22; border-radius:4px; box-shadow:0 0 40px #00000066; cursor:none; touch-action:none; width:min(480px,calc(100vw - 16px)); height:auto; aspect-ratio:480/520; }
-  #game-toolbar { display:flex; justify-content:center; width:min(480px,calc(100vw - 16px)); margin-top:10px; }
+  canvas { display:block; border:1px solid #ffffff22; border-radius:4px; box-shadow:0 0 40px #00000066; cursor:none; touch-action:none; width:min(540px,calc(100vw - 16px)); height:auto; aspect-ratio:540/620; }
+  #game-toolbar { display:flex; justify-content:center; width:min(540px,calc(100vw - 16px)); margin-top:10px; }
   #hint { font-size:0.6rem; letter-spacing:.2em; color:#444; }
 
   /* ── SCREENS ── */
@@ -436,7 +436,7 @@
 <body>
 
 <!-- ══ GAME VIEW ══ -->
-<div id="build-ver">v1.0</div>
+<div id="build-ver">v1.1</div>
 <!-- touch drag zone — fixed to bottom on mobile, lives outside game-view -->
 <div id="touch-zone">
   <div id="touch-zone-track"></div>
@@ -454,7 +454,7 @@
       <button id="mobile-pause-btn" onclick="openPause()">⏸</button>
     </div>
   </div>
-  <canvas id="c" width="480" height="520"></canvas>
+  <canvas id="c" width="540" height="620"></canvas>
   <div id="game-toolbar">
     <div id="hint">MOUSE / ← → &nbsp;·&nbsp; SPACE to launch &nbsp;·&nbsp; ESC to pause</div>
   </div>
@@ -974,30 +974,31 @@ function renderSkins(){
 
 // ── Level layouts (value: 0=empty, 1-6=brick color, 9=unbreakable steel) ──
 const LEVELS=[
-  // 1 — Classic full grid
-  [[1,1,1,1,1,1,1,1,1,1],[2,2,2,2,2,2,2,2,2,2],[3,3,3,3,3,3,3,3,3,3],[4,4,4,4,4,4,4,4,4,4],[5,5,5,5,5,5,5,5,5,5],[6,6,6,6,6,6,6,6,6,6]],
+  // 1 — Classic full grid (12×7 = 84 bricks)
+  [[1,1,1,1,1,1,1,1,1,1,1,1],[2,2,2,2,2,2,2,2,2,2,2,2],[3,3,3,3,3,3,3,3,3,3,3,3],[4,4,4,4,4,4,4,4,4,4,4,4],[5,5,5,5,5,5,5,5,5,5,5,5],[6,6,6,6,6,6,6,6,6,6,6,6],[1,2,3,4,5,6,6,5,4,3,2,1]],
   // 2 — Checkerboard
-  [[1,0,1,0,1,0,1,0,1,0],[0,2,0,2,0,2,0,2,0,2],[3,0,3,0,3,0,3,0,3,0],[0,4,0,4,0,4,0,4,0,4],[5,0,5,0,5,0,5,0,5,0],[0,6,0,6,0,6,0,6,0,6]],
-  // 3 — Diamond + 2 steel guards inside
-  [[0,0,0,0,1,1,0,0,0,0],[0,0,0,2,2,2,2,0,0,0],[0,0,3,9,3,3,9,3,0,0],[0,4,4,4,4,4,4,4,4,0],[0,0,5,5,9,5,5,5,0,0],[0,0,0,6,6,6,6,0,0,0]],
-  // 4 — Cross + steel at the intersection centre
-  [[0,0,0,0,1,1,0,0,0,0],[0,0,0,0,2,2,0,0,0,0],[3,3,3,3,9,9,3,3,3,3],[4,4,4,4,9,9,4,4,4,4],[0,0,0,0,5,5,0,0,0,0],[0,0,0,0,6,6,0,0,0,0]],
-  // 5 — V shape + steel flanking the V tip
-  [[1,0,0,0,0,0,0,0,0,1],[0,2,0,0,0,0,0,0,2,0],[0,0,3,0,0,0,0,3,0,0],[0,0,0,4,9,9,4,0,0,0],[0,0,9,0,5,5,0,9,0,0],[0,0,0,0,0,6,0,0,0,0]],
-  // 6 — Vertical stripes + steel plugging gaps
-  [[1,0,2,0,3,3,0,4,0,5],[1,9,2,0,3,3,0,4,9,5],[1,0,2,0,3,3,0,4,0,5],[6,0,1,0,2,2,0,3,0,4],[6,9,1,0,2,2,0,3,9,4],[6,0,1,0,2,2,0,3,0,4]],
+  [[1,0,1,0,1,0,1,0,1,0,1,0],[0,2,0,2,0,2,0,2,0,2,0,2],[3,0,3,0,3,0,3,0,3,0,3,0],[0,4,0,4,0,4,0,4,0,4,0,4],[5,0,5,0,5,0,5,0,5,0,5,0],[0,6,0,6,0,6,0,6,0,6,0,6],[1,0,2,0,3,0,4,0,5,0,6,0]],
+  // 3 — Diamond + steel guards
+  [[0,0,0,0,0,1,1,0,0,0,0,0],[0,0,0,0,2,2,2,2,0,0,0,0],[0,0,0,3,3,9,9,3,3,0,0,0],[0,0,4,4,4,4,4,4,4,4,0,0],[0,3,3,5,9,5,5,9,5,3,3,0],[0,0,0,6,6,6,6,6,6,0,0,0],[0,0,0,0,1,1,1,1,0,0,0,0]],
+  // 4 — Cross + steel intersection
+  [[0,0,0,0,0,1,1,0,0,0,0,0],[0,0,0,0,0,2,2,0,0,0,0,0],[3,3,3,3,3,9,9,3,3,3,3,3],[4,4,4,4,4,9,9,4,4,4,4,4],[0,0,0,0,0,5,5,0,0,0,0,0],[0,0,0,0,0,6,6,0,0,0,0,0],[0,0,0,0,0,1,1,0,0,0,0,0]],
+  // 5 — V shape + steel flanks
+  [[1,0,0,0,0,0,0,0,0,0,0,1],[0,2,0,0,0,0,0,0,0,0,2,0],[0,0,3,0,0,0,0,0,0,3,0,0],[0,0,0,4,9,0,0,9,4,0,0,0],[0,0,0,0,5,5,5,5,0,0,0,0],[0,0,0,0,0,6,6,0,0,0,0,0],[0,0,0,0,0,1,1,0,0,0,0,0]],
+  // 6 — Vertical stripes + steel plugs
+  [[1,0,2,0,3,0,4,0,5,0,6,0],[1,9,2,0,3,9,4,0,5,9,6,0],[1,0,2,0,3,0,4,0,5,0,6,0],[1,0,2,0,3,0,4,0,5,0,6,0],[6,0,5,0,4,0,3,0,2,0,1,0],[6,9,5,0,4,9,3,0,2,9,1,0],[6,0,5,0,4,0,3,0,2,0,1,0]],
   // 7 — Pyramid + steel mid-rows
-  [[0,0,0,0,0,0,0,0,0,0],[0,0,0,0,2,2,0,0,0,0],[0,0,0,3,3,3,3,0,0,0],[0,0,4,9,4,4,9,4,0,0],[0,5,5,9,5,5,9,5,5,0],[6,6,6,6,6,6,6,6,6,6]],
-  // 8 — Hourglass + steel at the waist edges
-  [[1,1,1,1,1,1,1,1,1,1],[0,2,2,2,2,2,2,2,2,0],[9,0,3,3,3,3,3,3,0,9],[9,0,4,4,4,4,4,4,0,9],[0,5,5,5,5,5,5,5,5,0],[6,6,6,6,6,6,6,6,6,6]],
-  // 9 — Maze + steel corner pins and centre obstacles
-  [[1,1,1,1,0,0,1,1,1,1],[1,9,0,1,0,0,1,0,9,1],[1,0,3,3,3,3,3,3,0,1],[1,0,4,9,0,0,9,4,0,1],[1,0,5,5,0,0,5,5,0,1],[1,1,1,6,0,0,6,1,1,1]],
-  // 10 — Final chaos + scattered steel
-  [[1,2,1,2,9,2,1,2,1,2],[3,1,4,1,5,1,9,1,3,1],[1,4,9,5,1,6,1,3,9,4],[5,1,6,1,3,9,4,1,5,1],[1,6,1,9,1,4,1,5,1,6],[2,1,2,1,2,1,2,9,2,1]],
+  [[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,1,1,0,0,0,0,0],[0,0,0,0,2,2,2,2,0,0,0,0],[0,0,0,3,3,9,9,3,3,0,0,0],[0,0,4,4,4,4,4,4,4,4,0,0],[0,5,5,5,5,9,9,5,5,5,5,0],[6,6,6,6,6,6,6,6,6,6,6,6]],
+  // 8 — Hourglass + steel pillars
+  [[1,1,1,1,1,1,1,1,1,1,1,1],[0,2,2,2,2,2,2,2,2,2,2,0],[9,0,3,3,3,3,3,3,3,3,0,9],[9,0,0,4,4,4,4,4,4,0,0,9],[9,0,3,3,3,3,3,3,3,3,0,9],[0,5,5,5,5,5,5,5,5,5,5,0],[6,6,6,6,6,6,6,6,6,6,6,6]],
+  // 9 — Maze + steel
+  [[1,1,1,1,1,0,0,1,1,1,1,1],[1,9,0,1,1,0,0,1,1,0,9,1],[1,0,3,3,3,3,3,3,3,3,0,1],[1,0,4,9,9,0,0,9,9,4,0,1],[1,0,5,5,0,0,0,0,5,5,0,1],[1,1,6,6,0,0,0,0,6,6,1,1],[1,1,1,1,1,1,1,1,1,1,1,1]],
+  // 10 — Final chaos
+  [[1,2,1,2,9,2,1,2,1,2,1,9],[3,1,4,1,5,1,9,1,3,1,5,1],[1,4,9,5,1,6,1,3,9,4,1,2],[5,1,6,1,3,9,4,1,5,1,6,1],[1,6,1,9,1,4,1,5,1,6,1,3],[2,1,2,1,2,9,2,1,2,1,2,1],[6,5,4,3,2,1,1,2,3,4,5,6]],
 ];
 
 // ── Power-up definitions ──
 const PUPS=[
+  // ── Buffs ──
   {id:'wide',  label:'W+', color:'#22aaff', name:'WIDE PAD'},
   {id:'sticky',label:'ST', color:'#ffdd00', name:'STICKY'},
   {id:'multi', label:'×3', color:'#ff8844', name:'MULTI BALL'},
@@ -1005,13 +1006,20 @@ const PUPS=[
   {id:'shield',label:'SH', color:'#44ff88', name:'SHIELD'},
   {id:'fire',  label:'★F', color:'#ff4422', name:'FIREBALL'},
   {id:'heart', label:'♥',  color:'#ff4466', name:'+1 LIFE'},
+  // ── Debuffs (avoid!) ──
+  {id:'narrow',label:'N−', color:'#e02244', name:'NARROW PAD', bad:true},
+  {id:'fast',  label:'↑↑', color:'#ff5500', name:'FAST BALL',  bad:true},
+  {id:'tiny',  label:'•',  color:'#bb44ff', name:'TINY BALL',  bad:true},
+  {id:'invert',label:'↔',  color:'#888888', name:'INVERTED',   bad:true},
 ];
 const PUP_W=44,PUP_H=20,PUP_SPEED=1.1,PUP_DURATION=900,PUP_CHANCE=0.18,HEART_CHANCE=0.025;
 
 const canvas=document.getElementById('c');
 const ctx=canvas.getContext('2d');
-const W=480,H=520,PW=90,PH=12,PY=H-36,BR=7;
-const COLS=10,BW=44,BH=16,BP=4,BOX=8,BOY=48;
+const W=540,H=620,PW=100,PH=14,PY=H-40;
+let BR=7; // ball radius — mutable for TINY BALL debuff
+const COLS=12,BW=40,BH=20,BP=4,BOX=8,BOY=56;
+const PW_BASE=PW; // immutable reference for paddle resize logic
 
 let paddle,balls=[],bricks,score,lives,currentLevel=1,keys={},gameRunning=false,animId;
 let particles=[],flashAlpha=0,powerups=[],activePups={},heartDropped=false,slowFactor=1,levelClearDelay=0,adminMode=false,lostLifeThisLevel=false;
@@ -1041,7 +1049,7 @@ function initState(lvl){
   balls=[{x:W/2,y:PY-BR-2,dx:0,dy:0,speed:levelSpeed(currentLevel),attached:true}];
   buildBricks(currentLevel-1);
   if(currentLevel===1){ score=0; lives=3; }
-  keys={}; particles=[]; flashAlpha=0; powerups=[]; activePups={}; heartDropped=false; slowFactor=1; levelClearDelay=0; lostLifeThisLevel=false; updateHUD();
+  keys={}; particles=[]; flashAlpha=0; powerups=[]; activePups={}; heartDropped=false; slowFactor=1; BR=7; levelClearDelay=0; lostLifeThisLevel=false; updateHUD();
 }
 
 function restoreState(s){
@@ -1049,7 +1057,7 @@ function restoreState(s){
   paddle={x:W/2-PW/2,y:PY,w:PW,h:PH};
   balls=[{x:W/2,y:PY-BR-2,dx:0,dy:0,speed:levelSpeed(currentLevel),attached:true}];
   bricks=s.bricks.map(b=>({...b})); score=s.score; lives=s.lives;
-  keys={}; particles=[]; flashAlpha=0; powerups=[]; activePups={}; heartDropped=false; slowFactor=1; levelClearDelay=0; lostLifeThisLevel=false; updateHUD();
+  keys={}; particles=[]; flashAlpha=0; powerups=[]; activePups={}; heartDropped=false; slowFactor=1; BR=7; levelClearDelay=0; lostLifeThisLevel=false; updateHUD();
 }
 
 function updateHUD(){
@@ -1088,7 +1096,7 @@ function advanceLevel(){
   paddle={x:W/2-PW/2,y:PY,w:PW,h:PH};
   balls=[{x:W/2,y:PY-BR-2,dx:0,dy:0,speed:levelSpeed(currentLevel),attached:true}];
   buildBricks(currentLevel-1);
-  keys={}; particles=[]; flashAlpha=0; powerups=[]; activePups={}; heartDropped=false; slowFactor=1; levelClearDelay=0; lostLifeThisLevel=false; updateHUD();
+  keys={}; particles=[]; flashAlpha=0; powerups=[]; activePups={}; heartDropped=false; slowFactor=1; BR=7; levelClearDelay=0; lostLifeThisLevel=false; updateHUD();
   gameRunning=true; if(animId)cancelAnimationFrame(animId); loop();
   setMobilePauseBtn(true);
 }
@@ -1096,14 +1104,24 @@ function advanceLevel(){
 // True for any touch/stylus device — skip pointer lock on these
 const _isTouch=()=>navigator.maxTouchPoints>0||'ontouchstart' in window;
 
+// Paddle movement helpers — respect the INVERTED debuff
+function setPaddleX(target){
+  if(activePups.invert) target = W - target - paddle.w;
+  paddle.x = Math.max(0, Math.min(W-paddle.w, target));
+}
+function movePaddleBy(dx){
+  if(activePups.invert) dx = -dx;
+  paddle.x = Math.max(0, Math.min(W-paddle.w, paddle.x + dx));
+}
+
 canvas.addEventListener('mousemove',e=>{
   if(!gameRunning)return;
   const r=canvas.getBoundingClientRect();
   const sx=W/r.width;
   if(!_isTouch()&&document.pointerLockElement===canvas){
-    paddle.x=Math.max(0,Math.min(W-paddle.w,paddle.x+e.movementX*sx*0.55));
+    movePaddleBy(e.movementX*sx*0.55);
   } else {
-    paddle.x=Math.max(0,Math.min(W-paddle.w,(e.clientX-r.left)*sx-paddle.w/2));
+    setPaddleX((e.clientX-r.left)*sx-paddle.w/2);
   }
 });
 canvas.addEventListener('click',()=>{
@@ -1123,14 +1141,14 @@ canvas.addEventListener('touchstart',e=>{
   if(!gameRunning)return;
   _touchMoved=false;
   const t=e.touches[0],r=canvas.getBoundingClientRect(),sx=W/r.width;
-  paddle.x=Math.max(0,Math.min(W-paddle.w,(t.clientX-r.left)*sx-paddle.w/2));
+  setPaddleX((t.clientX-r.left)*sx-paddle.w/2);
 },{passive:false});
 canvas.addEventListener('touchmove',e=>{
   e.preventDefault();
   if(!gameRunning)return;
   _touchMoved=true;
   const t=e.touches[0],r=canvas.getBoundingClientRect(),sx=W/r.width;
-  paddle.x=Math.max(0,Math.min(W-paddle.w,(t.clientX-r.left)*sx-paddle.w/2));
+  setPaddleX((t.clientX-r.left)*sx-paddle.w/2);
 },{passive:false});
 canvas.addEventListener('touchend',e=>{
   e.preventDefault();
@@ -1157,7 +1175,7 @@ _tz.addEventListener('touchstart',e=>{
   _tzLabel.style.opacity='0';
   const t=e.touches[0],r=_tz.getBoundingClientRect();
   const frac=Math.max(0,Math.min(1,(t.clientX-r.left)/r.width));
-  paddle.x=Math.max(0,Math.min(W-paddle.w,frac*W-paddle.w/2));
+  setPaddleX(frac*W-paddle.w/2);
   _tzUpdateThumb();
 },{passive:false});
 
@@ -1167,7 +1185,7 @@ _tz.addEventListener('touchmove',e=>{
   _tzMoved=true;
   const t=e.touches[0],r=_tz.getBoundingClientRect();
   const frac=Math.max(0,Math.min(1,(t.clientX-r.left)/r.width));
-  paddle.x=Math.max(0,Math.min(W-paddle.w,frac*W-paddle.w/2));
+  setPaddleX(frac*W-paddle.w/2);
   _tzUpdateThumb();
 },{passive:false});
 
@@ -1281,9 +1299,11 @@ function drawBalls(){
 // ── Power-up system ──
 function tryDropPowerup(cx,cy){
   if(Math.random()<PUP_CHANCE){
-    const pool=PUPS.filter(p=>p.id!=='heart');
-    const t=pool[Math.floor(Math.random()*pool.length)];
-    powerups.push({x:cx-PUP_W/2,y:cy,type:t.id,vy:PUP_SPEED});
+    // 70% buff, 30% debuff — debuffs are not too punishing but force player to dodge
+    const wantBad = Math.random() < 0.30;
+    const pool = PUPS.filter(p => p.id !== 'heart' && !!p.bad === wantBad);
+    const t = pool[Math.floor(Math.random()*pool.length)];
+    powerups.push({x:cx-PUP_W/2,y:cy,type:t.id,vy:PUP_SPEED,bad:!!t.bad});
   }
   if(!heartDropped&&Math.random()<HEART_CHANCE){
     heartDropped=true;
@@ -1299,14 +1319,36 @@ function updatePowerups(){
     return p.y<H+PUP_H;
   });
 }
+// Recalc derived state from active power-ups. Called whenever pups change.
+function recalcPaddleW(){
+  let target=PW_BASE;
+  if(activePups.wide)   target=Math.min(W-20,Math.round(PW_BASE*1.75));
+  if(activePups.narrow) target=Math.max(40,Math.round(PW_BASE*0.55));
+  // If both wide and narrow are active, wide wins (already set above by ordering)
+  if(activePups.wide && activePups.narrow) target=Math.round(PW_BASE*1.0); // neutralise
+  paddle.w=target;
+  paddle.x=Math.max(0,Math.min(W-paddle.w,paddle.x));
+}
+function recalcSpeed(){
+  if(activePups.slow)      slowFactor=0.55;
+  else if(activePups.fast) slowFactor=1.55;
+  else                     slowFactor=1;
+}
+function recalcBR(){
+  BR = activePups.tiny ? 4 : 7;
+}
+
 function applyPowerup(type){
-  if(type==='heart') sndHeart(); else sndPowerup();
-  if(type!=='heart'){score+=25;updateHUD();}
+  const def=PUPS.find(p=>p.id===type);
+  const bad=def&&def.bad;
+  if(type==='heart') sndHeart();
+  else if(bad)       sndDebuff();
+  else               sndPowerup();
+  if(type!=='heart' && !bad){score+=25;updateHUD();}
   switch(type){
-    case 'wide':
-      if(!activePups.wide)paddle.w=Math.min(W-20,Math.round(PW*1.75));
-      activePups.wide=PUP_DURATION;break;
-    case 'sticky':activePups.sticky=PUP_DURATION;break;
+    case 'wide':   activePups.wide=PUP_DURATION;   recalcPaddleW(); break;
+    case 'narrow': activePups.narrow=PUP_DURATION; recalcPaddleW(); break;
+    case 'sticky': activePups.sticky=PUP_DURATION; break;
     case 'multi':{
       const ref=balls.find(b=>!b.attached)||balls[0];
       for(let i=0;i<2;i++){
@@ -1315,12 +1357,13 @@ function applyPowerup(type){
       }
       if(balls.every(b=>b.attached))launch();
       break;}
-    case 'slow':
-      slowFactor=0.55;
-      activePups.slow=PUP_DURATION;break;
-    case 'shield':activePups.shield=PUP_DURATION;break;
-    case 'fire':activePups.fire=PUP_DURATION;break;
-    case 'heart':lives=Math.min(lives+1,5);updateHUD();break;
+    case 'slow':   activePups.slow=PUP_DURATION; recalcSpeed(); break;
+    case 'fast':   activePups.fast=PUP_DURATION; recalcSpeed(); break;
+    case 'shield': activePups.shield=PUP_DURATION; break;
+    case 'fire':   activePups.fire=PUP_DURATION; break;
+    case 'tiny':   activePups.tiny=PUP_DURATION; recalcBR(); break;
+    case 'invert': activePups.invert=PUP_DURATION; break;
+    case 'heart':  lives=Math.min(lives+1,5); updateHUD(); break;
   }
 }
 function tickActivePups(){
@@ -1329,28 +1372,39 @@ function tickActivePups(){
   }
 }
 function expirePowerup(type){
-  if(type==='wide'){paddle.w=PW;paddle.x=Math.min(paddle.x,W-PW);}
-  if(type==='slow')slowFactor=1;
+  if(type==='wide'||type==='narrow') recalcPaddleW();
+  if(type==='slow'||type==='fast')   recalcSpeed();
+  if(type==='tiny')                  recalcBR();
 }
 function drawPowerups(){
   if(!powerups.length)return;
   ctx.save();ctx.textAlign='center';ctx.textBaseline='middle';
+  const pulse = 0.5 + 0.5*Math.sin(Date.now()/120); // for debuff warning pulse
   for(const p of powerups){
     const def=PUPS.find(t=>t.id===p.type);if(!def)continue;
-    // Dark bg with outer glow
-    ctx.shadowColor=def.color;ctx.shadowBlur=16;
+    const bad=def.bad;
+    // Dark bg with outer glow — debuffs pulse menacingly
+    ctx.shadowColor=def.color;ctx.shadowBlur=bad?(20+pulse*16):16;
     ctx.fillStyle='#0d0d0dee';
     rrPath(ctx,p.x,p.y,PUP_W,PUP_H,PUP_H/2);ctx.fill();
     // Colour tint fill
     ctx.shadowBlur=0;
-    ctx.fillStyle=def.color+'55';
+    ctx.fillStyle=def.color+(bad?'66':'55');
     rrPath(ctx,p.x+1,p.y+1,PUP_W-2,PUP_H-2,(PUP_H-2)/2);ctx.fill();
-    // Bright border
-    ctx.strokeStyle=def.color;ctx.lineWidth=1.5;
-    ctx.shadowColor=def.color;ctx.shadowBlur=8;
+    // Border — debuffs get a thicker pulsing border
+    ctx.strokeStyle=def.color;ctx.lineWidth=bad?2.2:1.5;
+    ctx.shadowColor=def.color;ctx.shadowBlur=bad?(12+pulse*8):8;
+    if(bad) ctx.setLineDash([4,3]);
     rrPath(ctx,p.x+0.75,p.y+0.75,PUP_W-1.5,PUP_H-1.5,(PUP_H-1.5)/2);ctx.stroke();
+    if(bad) ctx.setLineDash([]);
+    // Warning chevrons on either side of the label for debuffs
+    if(bad){
+      ctx.fillStyle=def.color;ctx.font='bold 10px Orbitron,monospace';ctx.shadowBlur=0;
+      ctx.fillText('!',p.x+6,p.y+PUP_H/2);
+      ctx.fillText('!',p.x+PUP_W-6,p.y+PUP_H/2);
+    }
     // White label with colour glow
-    ctx.shadowBlur=14;ctx.fillStyle='#ffffff';
+    ctx.shadowColor=def.color;ctx.shadowBlur=14;ctx.fillStyle='#ffffff';
     ctx.font='bold 11px Orbitron,monospace';
     ctx.fillText(def.label,p.x+PUP_W/2,p.y+PUP_H/2);
     ctx.shadowBlur=0;
@@ -1436,8 +1490,8 @@ function update(){
     if(levelClearDelay===0){endGame(true);}
     return;
   }
-  if(keys['ArrowLeft'])  paddle.x=Math.max(0,paddle.x-6);
-  if(keys['ArrowRight']) paddle.x=Math.min(W-paddle.w,paddle.x+6);
+  if(keys['ArrowLeft'])  movePaddleBy(-6);
+  if(keys['ArrowRight']) movePaddleBy(6);
   tickActivePups();
   updatePowerups();
   const lost=[];
@@ -1673,6 +1727,12 @@ function sndHeart(){
   // sweeter ascending arpeggio with final shimmer
   const notes=[523,659,784,988,1319];
   notes.forEach((f,i)=>_tone(f,'sine',0.14,0.10,f,i*0.07));
+}
+function sndDebuff(){
+  // dissonant descending warning — clearly negative
+  _tone(330,'sawtooth',0.14,0.16,180,0);
+  _tone(220,'sawtooth',0.12,0.18,110,0.08);
+  _noise(0.06,0.08,0);
 }
 function sndLifeLost(){
   // descending 3 notes + low thud
