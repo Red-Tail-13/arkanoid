@@ -933,7 +933,7 @@ function loadSlot(i){
   const s=getSlot(i); if(!s) return;
   if(s.themeId){ const t=THEMES.find(x=>x.id===s.themeId); if(t){theme=t;try{localStorage.setItem('ark_theme',t.id);}catch(e){} applyTheme();} }
   showScreen(null); document.getElementById('game-view').style.display='flex';
-  restoreState(s); gameRunning=true; if(animId)cancelAnimationFrame(animId); loop();
+  restoreState(s); gameRunning=true; if(animId)cancelAnimationFrame(animId); _loopLast=0; loop();
   startMusic();
   if(!_isTouch()) canvas.requestPointerLock();
   setMobilePauseBtn(true);
@@ -1010,7 +1010,7 @@ function openPause(){
 }
 function resumeFromPause(){
   showScreen(null); document.getElementById('game-view').style.display='flex';
-  gameRunning=true; loop();
+  gameRunning=true; _loopLast=0; loop();
   startMusic();
   if(!_isTouch()) _tryLock();
   setMobilePauseBtn(true);
@@ -1185,7 +1185,7 @@ function setMobilePauseBtn(show){
 function startNewGame(){
   showScreen(null); document.getElementById('game-view').style.display='flex';
   canvas.style.background=theme.bg; initState(1);
-  gameRunning=true; if(animId)cancelAnimationFrame(animId); loop();
+  gameRunning=true; if(animId)cancelAnimationFrame(animId); _loopLast=0; loop();
   startMusic();
   if(!_isTouch()) canvas.requestPointerLock();
   setMobilePauseBtn(true);
@@ -1201,7 +1201,7 @@ function advanceLevel(){
   balls=[{x:W/2,y:PY-BR-2,dx:0,dy:0,speed:levelSpeed(currentLevel),attached:true}];
   buildBricks(currentLevel-1);
   keys={}; particles=[]; flashAlpha=0; powerups=[]; activePups={}; heartDropped=false; slowFactor=1; BR=7; levelClearDelay=0; lostLifeThisLevel=false; updateHUD();
-  gameRunning=true; if(animId)cancelAnimationFrame(animId); loop();
+  gameRunning=true; if(animId)cancelAnimationFrame(animId); _loopLast=0; loop();
   setMobilePauseBtn(true);
 }
 
@@ -1681,9 +1681,25 @@ function update(){
 }
 function drawFlash(){if(flashAlpha>0){ctx.fillStyle=`rgba(255,50,80,${flashAlpha})`;ctx.fillRect(0,0,W,H);flashAlpha-=.04;}}
 
-function loop(){
+const _TICK=1000/60; // fixed physics timestep — 60 ticks/sec regardless of display Hz
+let _loopLast=0,_loopAccum=0;
+
+function loop(ts){
   if(!gameRunning)return;
-  drawBg();updateParticles();drawParticles();update();drawBricks();drawPowerups();drawPaddle();drawBalls();drawShield();drawActivePups();drawFlash();
+  if(!ts) ts=performance.now();
+  if(!_loopLast) _loopLast=ts;
+  _loopAccum+=Math.min(ts-_loopLast,50); // cap at 50ms so paused tabs don't spiral
+  _loopLast=ts;
+
+  // physics: run as many 60fps ticks as have accumulated
+  while(_loopAccum>=_TICK){
+    update();
+    updateParticles();
+    _loopAccum-=_TICK;
+  }
+
+  // draw every frame regardless of Hz
+  drawBg();drawParticles();drawBricks();drawPowerups();drawPaddle();drawBalls();drawShield();drawActivePups();drawFlash();
   _tzUpdateThumb();
   if(levelClearDelay>0){
     const d=levelClearDelay;
